@@ -50,9 +50,23 @@ def newItem():
         categories = session.query(Category).all()
         return render_template("newitem.html", categories=categories)
 
-@app.route('/catalouge/<string:itemname>/edit')
-def editItem(itemname):
-    return "Edit item"
+@app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
+def editItem(itemtitle):
+    item = getItemByTitle(itemtitle)
+    print item
+    categories = session.query(Category).all()
+    if item:
+        if request.method == 'POST':
+            item.title = request.form['title']
+            item.description = request.form['description']
+            item.category_id = request.form['category_id']
+            session.add(item)
+            session.commit()
+            category = getCategoryById(item.category_id)
+            flash('item edited Successfully!')
+            return redirect(url_for('allItems', catgryname=category.name))
+        else:
+            return render_template("edititem.html", item=item, categories=categories)
 
 @app.route('/catalouge/<string:itemname>/delete')
 def deleteItem(itemname):
@@ -66,6 +80,19 @@ def descItem(catgryname, itemname):
 def getCategory(name):
     try:
         return session.query(Category).filter_by(name=name).one()
+    except:
+        return None
+
+def getCategoryById(id):
+    print session.query(Category).filter_by(id=id).one()
+    try:
+        return session.query(Category).filter_by(id=id).one()
+    except:
+        return None
+
+def getItemByTitle(title):
+    try:
+        return session.query(Item).filter_by(title=title).one()
     except:
         return None
 
