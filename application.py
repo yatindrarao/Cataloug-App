@@ -23,15 +23,32 @@ session = DBSession()
 
 @app.route('/')
 def allCategory():
-    return "All Categories"
+    catgs = session.query(Category).all()
+    return render_template("index.html", categories=catgs)
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):
-    return "List of Category items"
+    category = getCategory(catgryname)
+    if category:
+        items = session.query(Item).filter_by(category_id=category.id)
+        return render_template("items.html", items=items, category=category)
+    else:
+        return render_template('page not found'), 400
 
-@app.route('/catalouge/item/new')
+@app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
-    return "New item"
+    if request.method == 'POST':
+        newItem = Item(title=request.form['title'],
+                    description=request.form['description'],
+                    category_id=request.form['category_id'])
+        session.add(newItem)
+        session.commit()
+        category = session.query(Category).filter_by(id=newItem.category_id).first()
+        flash('New Item %s Successfully Created' % newItem.title)
+        return redirect(url_for('allItems', catgryname=category.name))
+    else:
+        categories = session.query(Category).all()
+        return render_template("newitem.html", categories=categories)
 
 @app.route('/catalouge/<string:itemname>/edit')
 def editItem(itemname):
@@ -44,6 +61,13 @@ def deleteItem(itemname):
 @app.route('/catalouge/<string:catgryname>/<string:itemname>')
 def descItem(catgryname, itemname):
     return "View item"
+
+
+def getCategory(name):
+    try:
+        return session.query(Category).filter_by(name=name).one()
+    except:
+        return None
 
 
 if __name__ == '__main__':

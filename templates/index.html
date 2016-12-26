@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Catalouge</title>
+  </head>
+  <body>
+    <ul>
+      {% for category in categories %}
+      <div>
+        <li>{{category.name}}</li>
+        <a href="{{url_for('allItems', catgryname=category.name)}}">Edit</a>
+      </div>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

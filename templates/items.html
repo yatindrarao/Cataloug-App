@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Category Items</title>
+  </head>
+  <body>
+    <div class = 'flash'>
+    	{% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li> <strong> {{ message }} </strong> </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <a href="{{url_for('newItem')}}">New Item</a>
+    <ul>
+      {% for item in items %}
+      <div class="">
+        <li>{{item.title}}</li>
+      </div>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
