@@ -3,7 +3,7 @@ app = Flask(__name__)
 
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-# from database_setup import Category, Itemm
+from database_setup import Base, Category, Item, User
 from flask import session as login_session
 import random
 import string
@@ -14,7 +14,7 @@ import json
 from flask import make_response
 import requests
 
-#Connect to Database and create database session
+# Connect to Database and create database session
 engine = create_engine('sqlite:///catalouge.db')
 Base.metadata.bind = engine
 
@@ -25,20 +25,24 @@ session = DBSession()
 def allCategory():
     return "All Categories"
 
-@app.route('/catalouge/<string: catgryname>/item/')
+@app.route('/catalouge/<string:catgryname>/items')
+def allItems(catgryname):
     return "List of Category items"
 
-@app.route('/catalouge/item/new/')
+@app.route('/catalouge/item/new')
 def newItem():
     return "New item"
 
-@app.route('/catalouge/<string: itemname>/edit/')
+@app.route('/catalouge/<string:itemname>/edit')
+def editItem(itemname):
     return "Edit item"
 
-@app.route('/catalouge/<string: itemname>/delete/')
+@app.route('/catalouge/<string:itemname>/delete')
+def deleteItem(itemname):
     return "Delete item"
 
-@app.route('/catalouge/<string: catgryname>/<string: itemname>/')
+@app.route('/catalouge/<string:catgryname>/<string:itemname>')
+def descItem(catgryname, itemname):
     return "View item"
 
 
