@@ -43,14 +43,26 @@ def descItem(itemtitle):
     else:
         return "No item found"    
 
+@app.route('/catalouge/<string:catgryname>/items.json')
+def allItemsJSON(catgryname):
+    category = getCategory(catgryname)
+    if category:
+        items = session.query(Item).filter_by(category_id=category.id)
+        list = []
+        for i in items:
+            list.append(i.serialize)
+
+        return jsonify(items=list)
+    else:
+        return jsonify("Not Found",400)    
+
 @app.route('/catalouge/<string:itemtitle>.json')
 def getItemJSON(itemtitle):
     item = getItemByTitle(itemtitle)
-    print "item for json is %s"%item
     if item:
         return jsonify(item=item.serialize)
     else:
-        return "No item found"    
+        return jsonify("Not Found",400)    
 
 
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
