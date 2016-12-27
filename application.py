@@ -64,7 +64,8 @@ def editItem(itemtitle):
             session.commit()
             category = getCategoryById(item.category_id)
             flash('item edited Successfully!')
-            return redirect(url_for('allItems', catgryname=category.name))
+            return redirect(url_for('descItem', catgryname=category.name,
+                    itemtitle=itemtitle))
         else:
             return render_template("edititem.html", item=item, categories=categories)
 
@@ -86,8 +87,11 @@ def deleteItem(itemtitle):
 
 @app.route('/catalouge/<string:catgryname>/<string:itemtitle>')
 def descItem(catgryname, itemtitle):
-    return "View item"
-
+    item = getItemByTitle(itemtitle)
+    if item:
+        return render_template("viewitem.html", item=item)
+    else:
+        return "No item found"    
 
 def getCategory(name):
     try:
