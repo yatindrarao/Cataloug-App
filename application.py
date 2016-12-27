@@ -174,28 +174,6 @@ def descItem(itemtitle):
     else:
         return "No item found"
 
-@app.route('/catalouge/<string:catgryname>/items.json')
-def allItemsJSON(catgryname):
-    category = getCategory(catgryname)
-    if category:
-        items = session.query(Item).filter_by(category_id=category.id)
-        list = []
-        for i in items:
-            list.append(i.serialize)
-
-        return jsonify(items=list)
-    else:
-        return jsonify("Not Found",400)
-
-@app.route('/catalouge/<string:itemtitle>.json')
-def getItemJSON(itemtitle):
-    item = getItemByTitle(itemtitle)
-    if item:
-        return jsonify(item=item.serialize)
-    else:
-        return jsonify("Not Found",400)
-
-
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
     if user_signed_in():
@@ -278,6 +256,18 @@ def deleteItem(itemtitle):
         message = "You are required to login"
         url = '/login'
         return render_template("alert.html", message=message, url=url)
+
+@app.route('/catalouge.json')
+def allCategoryJSON():
+    categories = session.query(Category).all()
+    list = []
+    for category in categories:
+        cat = category.serialize
+        items = session.query(Item).filter_by(category_id=category.id)
+        cat.update({'Item': [i.serialize for i in items]})
+        list.append(cat)
+
+    return jsonify(Category=list)
 
 @app.errorhandler(404)
 def page_not_found(e):
