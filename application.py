@@ -117,12 +117,12 @@ def gconnect():
 
 @app.route('/gdisconnet')
 def gdisconnet():
-    access_token = login_session['credentials']
+    access_token = login_session.get('credentials')
     if access_token is None:
         response = make_response(json.dumps('Current User is not connected'),
                 401)
         response.headers['Content-Type'] = 'application/json'
-        return respone
+        return response
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'% access_token
 
     h = httplib2.Http()
