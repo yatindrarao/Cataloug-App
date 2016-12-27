@@ -5,21 +5,37 @@
     <title></title>
   </head>
   <body>
+    <div class = 'flash'>
+      {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li> <strong> {{ message }} </strong> </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
     <form  action="/catalouge/item/new" method="post">
       <label>Title:</label>
-      <input type="text" name="title">
+      <input type="text" name="title" value="{{title}}">
       <br>
       <label>Description:</label>
-      <textarea name="description" rows="8" cols="40"></textarea>
+      <textarea name="description" rows="8" cols="40">{{description}}</textarea>
       <br>
       <label>Category:</label>
       <select name="category_id">
         {% for category in categories %}
-          <option value="{{category.id}}">{{category.name}}</option>
+          {% if category.id == category_id %}
+            <option value="{{category.id}}" selected>{{category.name}}</option>
+          {% else %}
+            <option value="{{category.id}}">{{category.name}}</option>
+          {% endif %}  
         {% endfor %}
       </select>
       <br>
       <input type="submit">
+      <a href="{{url_for('allCategory')}}">Cancel</a>
     </form>
   </body>
 </html>

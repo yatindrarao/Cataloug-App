@@ -12,9 +12,11 @@
 	            {% endif %}
 	        {% endwith %}
     	</div>
-
 		<h2>{{item.title}}</h2>
 		<p>{{item.description}}</p>	
+		<a href="{{url_for('editItem', itemtitle=item.title)}}">Edit</a>
+        <a href="{{url_for('deleteItem', itemtitle=item.title)}}">Delete</a>
+ 
 	</body>
 
 </html>

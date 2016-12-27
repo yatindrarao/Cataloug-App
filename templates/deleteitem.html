@@ -4,7 +4,7 @@
 	<h2>Are you sure you want to delete {{item.title}} of {{item.category.name}}?</h2>
 	<form action="{{url_for('deleteItem', itemtitle=item.title)}}" method="post">
 		<input type="submit" value="Delete">
-		<a href="{{url_for('allItems',catgryname=item.category.name)}}">Cancel</a>
+		<a href="{{url_for('descItem', itemtitle=item.title)}}">Cancel</a>
 	</form>
 </body>
 </html>

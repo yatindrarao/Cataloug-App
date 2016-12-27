@@ -37,17 +37,25 @@ def allItems(catgryname):
 
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
+    categories = session.query(Category).all()
     if request.method == 'POST':
-        newItem = Item(title=request.form['title'],
-                    description=request.form['description'],
-                    category_id=request.form['category_id'])
-        session.add(newItem)
-        session.commit()
-        category = session.query(Category).filter_by(id=newItem.category_id).first()
-        flash('New Item %s Successfully Created' % newItem.title)
-        return redirect(url_for('allItems', catgryname=category.name))
+        item = getItemByTitle(request.form['title'])
+        if not item:
+            newItem = Item(title=request.form['title'],
+                        description=request.form['description'],
+                        category_id=request.form['category_id'])
+            session.add(newItem)
+            session.commit()
+            category = session.query(Category).filter_by(id=newItem.category_id).first()
+            flash('New Item %s Successfully Created' % newItem.title)
+            return redirect(url_for('allItems', catgryname=category.name))
+        else:
+            flash('title already exists!')
+            return render_template("newitem.html", categories=categories,  
+                title=request.form['title'], 
+                description=request.form['description'], 
+                category_id=request.form['category_id'])    
     else:
-        categories = session.query(Category).all()
         return render_template("newitem.html", categories=categories)
 
 @app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
@@ -85,8 +93,8 @@ def deleteItem(itemtitle):
         return "No element found"        
 
 
-@app.route('/catalouge/<string:catgryname>/<string:itemtitle>')
-def descItem(catgryname, itemtitle):
+@app.route('/catalouge/<string:itemtitle>')
+def descItem(itemtitle):
     item = getItemByTitle(itemtitle)
     if item:
         return render_template("viewitem.html", item=item)
