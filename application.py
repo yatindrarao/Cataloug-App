@@ -35,6 +35,24 @@ def allItems(catgryname):
     else:
         return render_template('page not found'), 400
 
+@app.route('/catalouge/<string:itemtitle>')
+def descItem(itemtitle):
+    item = getItemByTitle(itemtitle)
+    if item:
+        return render_template("viewitem.html", item=item)
+    else:
+        return "No item found"    
+
+@app.route('/catalouge/<string:itemtitle>.json')
+def getItemJSON(itemtitle):
+    item = getItemByTitle(itemtitle)
+    print "item for json is %s"%item
+    if item:
+        return jsonify(item=item.serialize)
+    else:
+        return "No item found"    
+
+
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
     categories = session.query(Category).all()
@@ -92,14 +110,6 @@ def deleteItem(itemtitle):
     else:
         return "No element found"        
 
-
-@app.route('/catalouge/<string:itemtitle>')
-def descItem(itemtitle):
-    item = getItemByTitle(itemtitle)
-    if item:
-        return render_template("viewitem.html", item=item)
-    else:
-        return "No item found"    
 
 def getCategory(name):
     try:
