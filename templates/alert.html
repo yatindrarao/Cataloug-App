@@ -1,0 +1,13 @@
+<script>
+    function redirectToURL(){
+        window.location.href = '{{url}}';
+    }
+    function showAlert(){
+
+        alert('{{message}}');
+        redirectToURL()
+    }
+</script>
+<body onload='showAlert()'>
+
+</body>

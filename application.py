@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect,jsonify, url_for, flash
+from flask import Flask, render_template, request, redirect,jsonify, url_for, flash, abort
 app = Flask(__name__)
 
 from sqlalchemy import create_engine, asc
@@ -146,22 +146,31 @@ def gdisconnet():
 @app.route('/')
 def allCategory():
     catgs = session.query(Category).all()
-    return render_template("index.html", categories=catgs)
+    if user_signed_in():
+        return render_template("index.html", categories=catgs)
+    else:
+        return render_template("publicindex.html", categories=catgs)
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):
     category = getCategory(catgryname)
     if category:
         items = session.query(Item).filter_by(category_id=category.id)
-        return render_template("items.html", items=items, category=category)
+        if user_signed_in():
+            return render_template("items.html", items=items, category=category)
+        else:
+            return render_template("publicitems.html", items=items, category=category)
     else:
-        return render_template('page not found'), 400
+        return abort(404)
 
 @app.route('/catalouge/<string:itemtitle>')
 def descItem(itemtitle):
     item = getItemByTitle(itemtitle)
     if item:
-        return render_template("viewitem.html", item=item)
+        if user_signed_in() and item.user_id == login_session.get('user_id'):
+            return render_template("viewitem.html", item=item)
+        else:
+            return render_template("publicviewitem.html", item=item)
     else:
         return "No item found"
 
@@ -212,56 +221,67 @@ def newItem():
         else:
             return render_template("newitem.html", categories=categories)
     else:
-        return '''
-                <script>
-                    function redirectToLogin(){
-                        window.location.href = '/login';
-                    }
-
-                    function showAlert(){
-                        alert('You are required to login to continue');
-                        redirectToLogin()
-                    }
-                </script>
-                <body onload='showAlert()'>
-
-                </body>
-
-                '''
+        message = "You are required to login"
+        url = '/login'
+        return render_template("alert.html", message=message, url=url)
 
 @app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
 def editItem(itemtitle):
-    item = getItemByTitle(itemtitle)
-    print item
-    categories = session.query(Category).all()
-    if item:
-        if request.method == 'POST':
-            item.title = request.form['title']
-            item.description = request.form['description']
-            item.category_id = request.form['category_id']
-            session.add(item)
-            session.commit()
-            category = getCategoryById(item.category_id)
-            flash('item edited Successfully!')
-            return redirect(url_for('descItem', catgryname=category.name,
-                    itemtitle=itemtitle))
+    if user_signed_in():
+        item = getItemByTitle(itemtitle)
+        categories = session.query(Category).all()
+        if item:
+            if item.user_id == login_session.get('user_id'):
+                if request.method == 'POST':
+                    item.title = request.form['title']
+                    item.description = request.form['description']
+                    item.category_id = request.form['category_id']
+                    session.add(item)
+                    session.commit()
+                    category = getCategoryById(item.category_id)
+                    flash('item edited Successfully!')
+                    return redirect(url_for('descItem', itemtitle=itemtitle))
+                else:
+                    return render_template("edititem.html", item=item, categories=categories)
+            else:
+                message = "You are not authorized to edit this item"
+                url = url_for('descItem', itemtitle=item.title)
+                return render_template("alert.html", message=message, url=url)
         else:
-            return render_template("edititem.html", item=item, categories=categories)
+            return "Not found"
+    else:
+        message = "You are required to login"
+        url = '/login'
+        return render_template("alert.html", message=message, url=url)
 
 @app.route('/catalouge/<string:itemtitle>/delete', methods=['GET', 'POST'])
 def deleteItem(itemtitle):
-    item = getItemByTitle(itemtitle)
-    if item:
-        category = item.category.name
-        if request.method == 'POST':
-            session.delete(item)
-            session.commit()
-            flash('item deleted succssfully!')
-            return redirect(url_for('allItems', catgryname=category))
+    if user_signed_in():
+        item = getItemByTitle(itemtitle)
+        if item:
+            if item.user_id == login_session.get('user_id'):
+                category = item.category.name
+                if request.method == 'POST':
+                    session.delete(item)
+                    session.commit()
+                    flash('item deleted succssfully!')
+                    return redirect(url_for('allItems', catgryname=category))
+                else:
+                    return render_template("deleteitem.html", item=item)
+            else:
+                message = "You are not authorized to delete this item"
+                url = url_for('descItem', itemtitle=item.title)
+                return render_template("alert.html", message=message, url=url)
         else:
-            return render_template("deleteitem.html", item=item)
+            return "No element found"
     else:
-        return "No element found"
+        message = "You are required to login"
+        url = '/login'
+        return render_template("alert.html", message=message, url=url)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 def getCategory(name):
     try:
