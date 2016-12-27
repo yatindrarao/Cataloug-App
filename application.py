@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect,jsonify, url_for, flash, abort
 app = Flask(__name__)
 
-from sqlalchemy import create_engine, asc
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
 from flask import session as login_session
@@ -155,7 +155,7 @@ def allCategory():
 def allItems(catgryname):
     category = getCategory(catgryname)
     if category:
-        items = session.query(Item).filter_by(category_id=category.id)
+        items = session.query(Item).filter_by(category_id=category.id).order_by(desc(Item.created_at))
         if user_signed_in():
             return render_template("items.html", items=items, category=category)
         else:

@@ -1,7 +1,8 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
+import datetime
 
 Base = declarative_base()
 
@@ -45,6 +46,8 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(250), nullable=False)
     description = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, onupdate=datetime.datetime.now)
     category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
