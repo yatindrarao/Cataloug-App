@@ -9,7 +9,7 @@
       {% for category in categories %}
       <div>
         <li>{{category.name}}</li>
-        <a href="{{url_for('allItems', catgryname=category.name)}}">Edit</a>
+        <a href="{{url_for('allItems', catgryname=category.name)}}">View</a>
       </div>
       {% endfor %}
     </ul>

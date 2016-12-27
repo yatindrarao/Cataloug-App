@@ -68,12 +68,24 @@ def editItem(itemtitle):
         else:
             return render_template("edititem.html", item=item, categories=categories)
 
-@app.route('/catalouge/<string:itemname>/delete')
-def deleteItem(itemname):
-    return "Delete item"
+@app.route('/catalouge/<string:itemtitle>/delete', methods=['GET', 'POST'])
+def deleteItem(itemtitle):
+    item = getItemByTitle(itemtitle)
+    if item:
+        category = item.category.name
+        if request.method == 'POST':
+            session.delete(item)
+            session.commit()
+            flash('item deleted succssfully!')
+            return redirect(url_for('allItems', catgryname=category))
+        else:
+            return render_template("deleteitem.html", item=item)        
+    else:
+        return "No element found"        
 
-@app.route('/catalouge/<string:catgryname>/<string:itemname>')
-def descItem(catgryname, itemname):
+
+@app.route('/catalouge/<string:catgryname>/<string:itemtitle>')
+def descItem(catgryname, itemtitle):
     return "View item"
 
 
@@ -95,6 +107,12 @@ def getItemByTitle(title):
         return session.query(Item).filter_by(title=title).one()
     except:
         return None
+
+def getItemById(itemid):
+    try:
+        return session.query(Item).filter_by(id=itemid).one()
+    except:
+        return None    
 
 
 if __name__ == '__main__':
