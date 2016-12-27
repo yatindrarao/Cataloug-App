@@ -1,10 +1,10 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Delete item</title>
-  </head>
-  <body>
-    <h2>Are you sure you want to delete this {{item.title}}?</h2>
-  </body>
+
+<body>
+	<h2>Are you sure you want to delete {{item.title}} of {{item.category.name}}?</h2>
+	<form action="{{url_for('deleteItem', itemtitle=item.title)}}" method="post">
+		<input type="submit" value="Delete">
+		<a href="{{url_for('descItem', itemtitle=item.title)}}">Cancel</a>
+	</form>
+</body>
 </html>
