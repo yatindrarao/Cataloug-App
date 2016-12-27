@@ -189,26 +189,45 @@ def getItemJSON(itemtitle):
 
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
-    categories = session.query(Category).all()
-    if request.method == 'POST':
-        item = getItemByTitle(request.form['title'])
-        if not item:
-            newItem = Item(title=request.form['title'],
-                        description=request.form['description'],
-                        category_id=request.form['category_id'])
-            session.add(newItem)
-            session.commit()
-            category = session.query(Category).filter_by(id=newItem.category_id).first()
-            flash('New Item %s Successfully Created' % newItem.title)
-            return redirect(url_for('allItems', catgryname=category.name))
+    if user_signed_in():
+        categories = session.query(Category).all()
+        if request.method == 'POST':
+                item = getItemByTitle(request.form['title'])
+                if not item:
+                    newItem = Item(title=request.form['title'],
+                                description=request.form['description'],
+                                category_id=request.form['category_id'], 
+                                user_id=login_session['user_id'])
+                    session.add(newItem)
+                    session.commit()
+                    category = session.query(Category).filter_by(id=newItem.category_id).first()
+                    flash('New Item %s Successfully Created' % newItem.title)
+                    return redirect(url_for('allItems', catgryname=category.name))
+                else:
+                    flash('title already exists!')
+                    return render_template("newitem.html", categories=categories,  
+                        title=request.form['title'], 
+                        description=request.form['description'], 
+                        category_id=request.form['category_id'])           
         else:
-            flash('title already exists!')
-            return render_template("newitem.html", categories=categories,  
-                title=request.form['title'], 
-                description=request.form['description'], 
-                category_id=request.form['category_id'])    
+            return render_template("newitem.html", categories=categories)
     else:
-        return render_template("newitem.html", categories=categories)
+        return '''
+                <script>
+                    function redirectToLogin(){
+                        window.location.href = '/login';
+                    }
+
+                    function showAlert(){ 
+                        alert('You are required to login to continue');
+                        redirectToLogin()
+                    }
+                </script>
+                <body onload='showAlert()'>
+
+                </body>
+
+                '''             
 
 @app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
 def editItem(itemtitle):
@@ -291,6 +310,10 @@ def getUserID(user_email):
         return user.id
     except:
         return None
+
+def user_signed_in():
+    return login_session.get('user_id')
+
 
 if __name__ == '__main__':
   app.secret_key = 'super_secret_key'
