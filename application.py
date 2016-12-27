@@ -68,9 +68,14 @@ def editItem(itemtitle):
         else:
             return render_template("edititem.html", item=item, categories=categories)
 
-@app.route('/catalouge/<string:itemname>/delete')
-def deleteItem(itemname):
-    return "Delete item"
+@app.route('/catalouge/<string:itemtitle>/delete', methods=['GET', 'POST'])
+def deleteItem(itemtitle):
+    item = getItemByTitle(itemtitle)
+    if item:
+        if reuquest.method == 'POST':
+            return "POST"
+        else:
+            return render_template("deleteitem.html", item=item)
 
 @app.route('/catalouge/<string:catgryname>/<string:itemname>')
 def descItem(catgryname, itemname):
