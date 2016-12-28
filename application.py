@@ -115,7 +115,7 @@ def gconnect():
     print "done!"
     return output
 
-@app.route('/gdisconnet')
+@app.route('/logout')
 def gdisconnet():
     access_token = login_session.get('credentials')
     if access_token is None:
@@ -156,10 +156,11 @@ def allItems(catgryname):
     category = getCategory(catgryname)
     if category:
         items = session.query(Item).filter_by(category_id=category.id).order_by(desc(Item.created_at))
+        catgs = session.query(Category).all()
         if user_signed_in():
-            return render_template("items.html", items=items, category=category)
+            return render_template("items.html", items=items, category=category, categories=catgs)
         else:
-            return render_template("publicitems.html", items=items, category=category)
+            return render_template("publicitems.html", items=items, category=category, categories=catgs)
     else:
         return abort(404)
 
@@ -275,7 +276,7 @@ def page_not_found(e):
 
 def getCategory(name):
     try:
-        return session.query(Category).filter_by(name=name).one()
+        return session.query(Category).filter(Category.name == name).one()
     except:
         return None
 

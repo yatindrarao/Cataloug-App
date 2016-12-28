@@ -1,10 +1,12 @@
-<html>
-
-<body>
+{% extends "main.html" %}
+{% block content %}
+<div class="col-md-12 body-margin-bottom">
 	<h2>Are you sure you want to delete {{item.title}} of {{item.category.name}}?</h2>
-	<form action="{{url_for('deleteItem', itemtitle=item.title)}}" method="post">
-		<input type="submit" value="Delete">
-		<a href="{{url_for('descItem', itemtitle=item.title)}}">Cancel</a>
+	<form class="custom-form" action="{{url_for('deleteItem', itemtitle=item.title)}}" method="post">
+		<input class="btn btn-default" type="submit" value="Delete">
+		<div class="btn-group">
+			<a href="{{url_for('descItem', itemtitle=item.title)}}" class="btn btn-default">Cancel</a>
+		</div>
 	</form>
-</body>
-</html>
+</div>
+{% endblock %}

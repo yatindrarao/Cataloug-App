@@ -1,41 +1,32 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    <div class = 'flash'>
-      {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li> <strong> {{ message }} </strong> </li>
-            {% endfor %}
-            </ul>
-            {% endif %}
-        {% endwith %}
+{% extends "main.html" %}
+{% block content %}
+<div class="col-md-12 body-margin-bottom">
+  <h2>New Item</h2>
+  <form class="custom-form" action="{{url_for('newItem')}}" method="post">
+    <div class="form-group">
+      <label for="name">Title:</label>
+      <input type="text" class="form-control" name="title" value="{{title}}">
     </div>
-    <form  action="/catalouge/item/new" method="post">
-      <label>Title:</label>
-      <input type="text" name="title" value="{{title}}">
-      <br>
-      <label>Description:</label>
-      <textarea name="description" rows="8" cols="40">{{description}}</textarea>
-      <br>
-      <label>Category:</label>
-      <select name="category_id">
+    <div class="form-group ">
+      <label for="category">Description:</label>
+      <textarea name="description" class="form-control" rows="8" cols="40">{{description}}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="category_id">Category:</label>
+      <select class="form-control" name="category_id">
         {% for category in categories %}
           {% if category.id == category_id %}
             <option value="{{category.id}}" selected>{{category.name}}</option>
           {% else %}
             <option value="{{category.id}}">{{category.name}}</option>
-          {% endif %}  
+          {% endif %}
         {% endfor %}
       </select>
-      <br>
-      <input type="submit">
-      <a href="{{url_for('allCategory')}}">Cancel</a>
-    </form>
-  </body>
-</html>
+    </div>
+    <input class="btn btn-default" type="submit" value="Create">
+    <div class="btn-group">
+      <a href="{{url_for('allCategory')}}" class="btn btn-default">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

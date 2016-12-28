@@ -3,47 +3,42 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-    <link rel="stylesheet" href="../static/bootstrap.min.css">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    {% block load_scripts %}
+    {% endblock %}
   </head>
   <body>
-    <div class="container">
-      <nav class="navbar navbar-inverse">
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#">Catalouge App</a>
+    <div class="navbar navbar-inverse custom-navbar">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="{{url_for('allCategory')}}">Catalouge App</a>
+      </div>
+      <ul class="nav navbar-nav">
+          <!-- <li><a href="{{url_for('gdisconnet')}}">Logout</a></li> -->
+        <li><a href="{{url_for('showLogin')}}">Login</a></li>
+      </ul>
+    </div>
+    <!--End of Navbar  -->
+    <div class="container container-full">
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="row main-body border">
+            <div class = 'flash'>
+              {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul>
+                    {% for message in messages %}
+                        <li> <strong> {{ message }} </strong> </li>
+                    {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endwith %}
             </div>
-
-          <!-- Collect the nav links, forms, and other content for toggling -->
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav navbar-right">
-              <li><a href="#">Login</a></li>
-            </ul>
-          </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-      </nav>
-      <!--End of Navbar  -->
-      <div class="row ">
-        <div class="col-md-6">
-          <ul>
-            <li>cat1</li>
-            <li>cat1</li>
-            <li>cat1</li>
-          </ul>
+            {% block content %}
+            {% endblock %}
+          </div>
         </div>
-        <div class="col-md-6">
-          items
-        </div>
-
       </div>
     </div>
-
   </body>
 </html>

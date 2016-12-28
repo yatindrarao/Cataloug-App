@@ -1,19 +1,19 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Edit Item</title>
-  </head>
-  <body>
-    <form  action="{{url_for('editItem', itemtitle=item.title)}}" method="post">
-      <label>Title:</label>
-      <input type="text" name="title" value="{{item.title}}">
-      <br>
-      <label>Description:</label>
-      <textarea name="description" rows="8" cols="40">{{item.description}}</textarea>
-      <br>
-      <label>Category:</label>
-      <select name="category_id">
+{% extends "main.html" %}
+{% block content %}
+<div class="col-md-12 body-margin-bottom">
+  <h2>Edit Item</h2>
+  <form class="custom-form" action="{{url_for('editItem', itemtitle=item.title)}}" method="post">
+    <div class="form-group">
+      <label for="name">Title:</label>
+      <input type="text" class="form-control" name="title" value="{{item.title}}">
+    </div>
+    <div class="form-group ">
+      <label for="category">Description:</label>
+      <textarea name="description" class="form-control" rows="8" cols="40">{{item.description}}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="category_id">Category:</label>
+      <select class="form-control" name="category_id">
         {% for category in categories %}
           {% if category.id == item.category_id %}
             <option value="{{category.id}}" selected>{{category.name}}</option>
@@ -22,9 +22,11 @@
           {% endif %}
         {% endfor %}
       </select>
-      <br>
-      <input type="submit" value="Edit">
-      <a href="{{url_for('descItem', itemtitle=item.title)}}">Cancel</a>
-    </form>
-  </body>
-</html>
+    </div>
+    <input class="btn btn-default" type="submit" value="Edit">
+    <div class="btn-group">
+      <a href="{{url_for('descItem', itemtitle=item.title)}}" class="btn btn-default">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

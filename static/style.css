@@ -1,11 +1,35 @@
-*{
-    
+/**{
+outline: 1px solid red;
+}*/
+.container-full
+{
+  margin: 0 auto;
+  width: 100%;
+}
+.border
+{
+  border: 2px solid;
+}
+.custom-navbar
+{
+  border-radius: 0;
+}
+.main-body
+{
+  margin-top : 18px;
+  min-height: 320px;
+}
+.custom-form
+{
+  width: 50%;
+}
+.body-margin-bottom
+{
+  margin-bottom: 20px;
 }
 
-.main
-{
-    border: 2px solid #a1a1a1;
-    /*background: #dddddd;*/
-    width: 300px;
-    /*border-radius: 25px;*/
+/*Overriding Bootstrap Classes*/
+.list-group-item{
+  border: 0;
+  padding-left: 0;
 }

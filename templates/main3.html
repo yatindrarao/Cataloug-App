@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="../static/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/style.css">
+  </head>
+  <body>
+      <div class="navbar navbar-inverse custom-navbar">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Brand</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li><a href="#">Login</a></li>
+        </ul>
+      </div>
+      <!--End of Navbar  -->
+      <div class="container container-full">
+        <div class="row">
+          <div class="col-md-8 col-md-offset-2">
+            <div class="row main-body border">
+              <div class="col-md-12 body-margin-bottom">
+                <h2>New Item</h2>
+                <form class="custom-form" action="index.html" method="post">
+                  <div class="form-group">
+                    <label for="name">Title:</label>
+                    <input type="text" class="form-control" name="name" value="">
+                  </div>
+                  <div class="form-group ">
+                    <label for="category">Description:</label>
+                    <textarea name="name" class="form-control" rows="8" cols="40"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="name">Category:</label>
+                    <select class="form-control" name="">
+                      <option>cat1</option>
+                      <option>cat1</option>
+                      <option>cat1</option>
+                    </select>
+                  </div>
+                  <input class="btn btn-default" type="submit" name="name" value="Create">
+                  <div class="btn-group">
+                    <a href="#" class="btn btn-default">Cancel</a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>
