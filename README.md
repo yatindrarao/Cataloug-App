@@ -18,10 +18,9 @@ This app uses:
 
 ## Getting Started
 ### Step 1
-Take clone from www.github.com and change to project folder.
 ```
-$ git clone github.com
-$ cd catalouge
+$ git clone https://github.com/yatindrarao/Cataloug-App.git
+$ cd Cataloug-App
 ```
 
 ### Step 2
