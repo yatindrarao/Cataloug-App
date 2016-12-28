@@ -165,8 +165,9 @@ def allItems(catgryname):
 def descItem(itemtitle):
     item = getItemByTitle(itemtitle)
     if item:
-        logged_owner = user_signed_in() and item.user_id == login_session.get('user_id')
-        return render_template("viewitem.html", item=item, logged_owner=logged_owner)
+        owner = item.user_id == login_session.get('user_id')
+        return render_template("viewitem.html", item=item, owner=owner,
+                user_signed_in=user_signed_in())
     else:
         return "No item found"
 
@@ -193,7 +194,8 @@ def newItem():
                         description=request.form['description'],
                         category_id=request.form['category_id'])
         else:
-            return render_template("newitem.html", categories=categories)
+            return render_template("newitem.html", categories=categories,
+                    user_signed_in=user_signed_in())
     else:
         message = "You are required to login"
         url = '/login'
@@ -216,7 +218,8 @@ def editItem(itemtitle):
                     flash('item edited Successfully!')
                     return redirect(url_for('descItem', itemtitle=item.title))
                 else:
-                    return render_template("edititem.html", item=item, categories=categories)
+                    return render_template("edititem.html", item=item,
+                            categories=categories, user_signed_in=user_signed_in())
             else:
                 message = "You are not authorized to edit this item"
                 url = url_for('descItem', itemtitle=item.title)
@@ -241,7 +244,8 @@ def deleteItem(itemtitle):
                     flash('item deleted succssfully!')
                     return redirect(url_for('allItems', catgryname=category))
                 else:
-                    return render_template("deleteitem.html", item=item)
+                    return render_template("deleteitem.html", item=item,
+                            user_signed_in=user_signed_in())
             else:
                 message = "You are not authorized to delete this item"
                 url = url_for('descItem', itemtitle=item.title)
