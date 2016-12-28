@@ -5,7 +5,9 @@
 	<p>
 		{{item.description}}
 	</p>
-	<a href="{{url_for('editItem', itemtitle=item.title)}}">Edit</a>
-	<a href="{{url_for('deleteItem', itemtitle=item.title)}}">Delete</a>
+	{% if logged_owner %}
+		<a href="{{url_for('editItem', itemtitle=item.title)}}">Edit</a>
+		<a href="{{url_for('deleteItem', itemtitle=item.title)}}">Delete</a>
+	{% endif %}
 </div>
 {% endblock %}

@@ -14,8 +14,11 @@
         <a class="navbar-brand" href="{{url_for('allCategory')}}">Catalouge App</a>
       </div>
       <ul class="nav navbar-nav">
-          <!-- <li><a href="{{url_for('gdisconnet')}}">Logout</a></li> -->
-        <li><a href="{{url_for('showLogin')}}">Login</a></li>
+        {% if user_signed_in %}
+          <li><a href="{{url_for('gdisconnet')}}">Logout</a></li>
+        {% else %}
+          <li><a href="{{url_for('showLogin')}}">Login</a></li>
+        {% endif %}
       </ul>
     </div>
     <!--End of Navbar  -->

@@ -27,10 +27,14 @@ APPLICATION_NAME = "Catalouge Application"
 
 @app.route('/login')
 def showLogin():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-            for x in xrange(32))
-    login_session['state'] = state
-    return render_template('login.html', STATE=login_session['state'])
+    if not user_signed_in():
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                for x in xrange(32))
+        login_session['state'] = state
+        return render_template('login.html', STATE=login_session['state'])
+    else:
+        flash('You are already connected')
+        return redirect(url_for('allCategory'))
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -119,10 +123,8 @@ def gconnect():
 def gdisconnet():
     access_token = login_session.get('credentials')
     if access_token is None:
-        response = make_response(json.dumps('Current User is not connected'),
-                401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Current user is not connected")
+        return redirect(url_for('allCategory'))
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'% access_token
 
     h = httplib2.Http()
@@ -135,22 +137,18 @@ def gdisconnet():
         del login_session['picture']
         del login_session['user_id']
         del login_session['credentials']
-        response = make_response(json.dumps("Successfully disconnected"), 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Successfully disconnected")
+        return redirect(url_for('allCategory'))
     else:
-        response = make_response(json.dumps('Failed to disconnet'), 400)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Failed to disconnet")
+        return redirect(url_for('allCategory'))
 
 @app.route('/')
 def allCategory():
     catgs = session.query(Category).all()
     items = session.query(Item).order_by(desc(Item.created_at)).limit(6)
-    if user_signed_in():
-        return render_template("index.html", categories=catgs, items=items)
-    else:
-        return render_template("publicindex.html", categories=catgs, items=items)
+    return render_template("index.html", categories=catgs,
+            items=items, user_signed_in=user_signed_in())
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):
@@ -158,10 +156,8 @@ def allItems(catgryname):
     if category:
         items = session.query(Item).filter_by(category_id=category.id).order_by(desc(Item.created_at))
         catgs = session.query(Category).all()
-        if user_signed_in():
-            return render_template("items.html", items=items, category=category, categories=catgs)
-        else:
-            return render_template("publicitems.html", items=items, category=category, categories=catgs)
+        return render_template("items.html", items=items, category=category,
+                categories=catgs, user_signed_in=user_signed_in())
     else:
         return abort(404)
 
@@ -169,10 +165,8 @@ def allItems(catgryname):
 def descItem(itemtitle):
     item = getItemByTitle(itemtitle)
     if item:
-        if user_signed_in() and item.user_id == login_session.get('user_id'):
-            return render_template("viewitem.html", item=item)
-        else:
-            return render_template("publicviewitem.html", item=item)
+        logged_owner = user_signed_in() and item.user_id == login_session.get('user_id')
+        return render_template("viewitem.html", item=item, logged_owner=logged_owner)
     else:
         return "No item found"
 
@@ -220,7 +214,7 @@ def editItem(itemtitle):
                     session.commit()
                     category = getCategoryById(item.category_id)
                     flash('item edited Successfully!')
-                    return redirect(url_for('descItem', itemtitle=itemtitle))
+                    return redirect(url_for('descItem', itemtitle=item.title))
                 else:
                     return render_template("edititem.html", item=item, categories=categories)
             else:
