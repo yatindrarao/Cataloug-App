@@ -146,10 +146,11 @@ def gdisconnet():
 @app.route('/')
 def allCategory():
     catgs = session.query(Category).all()
+    items = session.query(Item).order_by(desc(Item.created_at)).limit(6)
     if user_signed_in():
-        return render_template("index.html", categories=catgs)
+        return render_template("index.html", categories=catgs, items=items)
     else:
-        return render_template("publicindex.html", categories=catgs)
+        return render_template("publicindex.html", categories=catgs, items=items)
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):

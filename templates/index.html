@@ -16,11 +16,13 @@
   <h2>Latest Items</h2>
   <a href="{{url_for('newItem')}}">Add Item</a>
   <ul class="list-group list-border">
-    <li class="list-group-item">Cras justo odio</li>
-    <li class="list-group-item">Dapibus ac facilisis in</li>
-    <li class="list-group-item">Morbi leo risus</li>
-    <li class="list-group-item">Porta ac consectetur ac</li>
-    <li class="list-group-item">Vestibulum at eros</li>
+    {% for item in items %}
+      <li class="list-group-item">
+        <a href="{{url_for('descItem', itemtitle=item.title)}}">
+          {{item.title}}  ({{item.category.name}})
+        </a>
+      </li>
+    {% endfor %}
   </ul>
 </div>
 {% endblock %}
