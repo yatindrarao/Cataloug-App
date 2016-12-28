@@ -6,6 +6,7 @@ import datetime
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'user'
 
@@ -16,13 +17,14 @@ class User(Base):
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-           'name'         : self.name,
-           'email'        : self.email,
-           'picture'      : self.picture,
-           'id'           : self.id,
-       }
+        """Return object data in easily serializeable format"""
+        return {
+          'name': self.name,
+          'email': self.email,
+          'picture': self.picture,
+          'id': self.id,
+        }
+
 
 class Category(Base):
     __tablename__ = 'category'
@@ -34,11 +36,12 @@ class Category(Base):
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-           'name'         : self.name,
-           'id'           : self.id,
-       }
+        """Return object data in easily serializeable format"""
+        return {
+          'name': self.name,
+          'id': self.id,
+        }
+
 
 class Item(Base):
     __tablename__ = 'item'
@@ -55,12 +58,12 @@ class Item(Base):
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-           'title'         : self.title,
-           'description'   : self.description,
-           'id'            : self.id
-       }
+        """Return object data in easily serializeable format"""
+        return {
+          'title': self.title,
+          'description': self.description,
+          'id': self.id
+        }
 
 
 engine = create_engine('sqlite:///catalouge.db')

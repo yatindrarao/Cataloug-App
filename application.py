@@ -1,19 +1,20 @@
-from flask import Flask, render_template, request, redirect,jsonify, url_for, flash, abort
-app = Flask(__name__)
+import requests
+from flask import Flask, render_template, request, redirect, jsonify, url_for,\
+ flash, abort
+from flask import session as login_session
+from flask import make_response
 
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
-from flask import session as login_session
 import random
 import string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
-from flask import make_response
-import requests
 
+app = Flask(__name__)
 # Connect to Database and create database session
 engine = create_engine('sqlite:///catalouge.db')
 Base.metadata.bind = engine
@@ -26,17 +27,21 @@ CLIENT_ID = json.loads(
             open('client_secret.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Catalouge Application"
 
+
 @app.route('/login')
 def showLogin():
     # Check if user is logged in
     if not user_signed_in():
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                for x in xrange(32))
+        state = ''.join(
+            random.choice(string.ascii_uppercase + string.digits)
+            for x in xrange(32)
+        )
         login_session['state'] = state
         return render_template('login.html', STATE=login_session['state'])
     else:
         flash('You are already connected')
         return redirect(url_for('allCategory'))
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -87,8 +92,8 @@ def gconnect():
     stored_credentials = login_session.get('credentials')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+                    'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Store the access token in the session for later use.
@@ -103,7 +108,8 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
-    # If user does not exist then create new user and store user_id in login_session
+    # If user does not exist then create new user and store user_id in
+    # login_session
     user_id = getUserID(login_session['email'])
     if not user_id:
         createUser(login_session)
@@ -116,10 +122,12 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ''' " style = "width: 300px; height: 300px;border-radius: 150px;
+                -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '''
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
+
 
 @app.route('/logout')
 def gdisconnet():
@@ -129,7 +137,7 @@ def gdisconnet():
         flash("Current user is not connected")
         return redirect(url_for('allCategory'))
     # Request google for logging out user
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'% access_token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
 
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
@@ -149,26 +157,40 @@ def gdisconnet():
         flash("Failed to disconnet")
         return redirect(url_for('allCategory'))
 
+
 @app.route('/')
 def allCategory():
     # Index page
     catgs = session.query(Category).all()
     # fetch latest items with limit 6 results
     items = session.query(Item).order_by(desc(Item.created_at)).limit(6)
-    return render_template("index.html", categories=catgs,
-            items=items, user_signed_in=user_signed_in())
+    return render_template(
+        "index.html",
+        categories=catgs,
+        items=items,
+        user_signed_in=user_signed_in()
+    )
+
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):
     # All items of particular category
     category = getCategory(catgryname)
     if category:
-        items = session.query(Item).filter_by(category_id=category.id).order_by(desc(Item.created_at))
+        items = session.query(Item).filter_by(
+            category_id=category.id
+            ).order_by(desc(Item.created_at))
         catgs = session.query(Category).all()
-        return render_template("items.html", items=items, category=category,
-                categories=catgs, user_signed_in=user_signed_in())
+        return render_template(
+            "items.html",
+            items=items,
+            category=category,
+            categories=catgs,
+            user_signed_in=user_signed_in()
+        )
     else:
         return abort(404)
+
 
 @app.route('/catalouge/<string:itemtitle>')
 def descItem(itemtitle):
@@ -176,10 +198,15 @@ def descItem(itemtitle):
     item = getItemByTitle(itemtitle)
     if item:
         owner = item.user_id == login_session.get('user_id')
-        return render_template("viewitem.html", item=item, owner=owner,
-                user_signed_in=user_signed_in())
+        return render_template(
+            "viewitem.html",
+            item=item,
+            owner=owner,
+            user_signed_in=user_signed_in()
+        )
     else:
         return "No item found"
+
 
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
@@ -189,30 +216,43 @@ def newItem():
         if request.method == 'POST':
                 item = getItemByTitle(request.form['title'])
                 if not item:
-                    newItem = Item(title=request.form['title'],
-                                description=request.form['description'],
-                                category_id=request.form['category_id'],
-                                user_id=login_session['user_id'])
+                    newItem = Item(
+                        title=request.form['title'],
+                        description=request.form['description'],
+                        category_id=request.form['category_id'],
+                        user_id=login_session['user_id']
+                    )
                     session.add(newItem)
                     session.commit()
-                    category = session.query(Category).filter_by(id=newItem.category_id).first()
+                    category = session.query(Category).filter_by(
+                                id=newItem.category_id).first()
                     flash('New Item %s Successfully Created' % newItem.title)
-                    return redirect(url_for('allItems', catgryname=category.name))
+                    return redirect(url_for(
+                        'allItems',
+                        catgryname=category.name)
+                    )
                 else:
                     # Validates uniquness of Item by title
                     flash('title already exists!')
-                    return render_template("newitem.html", categories=categories,
+                    return render_template(
+                        "newitem.html",
+                        categories=categories,
                         title=request.form['title'],
                         description=request.form['description'],
-                        category_id=request.form['category_id'])
+                        category_id=request.form['category_id']
+                    )
         else:
             # Render form for new item
-            return render_template("newitem.html", categories=categories,
-                    user_signed_in=user_signed_in())
+            return render_template(
+                "newitem.html",
+                categories=categories,
+                user_signed_in=user_signed_in()
+            )
     else:
         message = "You are required to login"
         url = '/login'
         return render_template("alert.html", message=message, url=url)
+
 
 @app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
 def editItem(itemtitle):
@@ -234,8 +274,12 @@ def editItem(itemtitle):
                     return redirect(url_for('descItem', itemtitle=item.title))
                 else:
                     # Render Edit Item form
-                    return render_template("edititem.html", item=item,
-                            categories=categories, user_signed_in=user_signed_in())
+                    return render_template(
+                        "edititem.html",
+                        item=item,
+                        categories=categories,
+                        user_signed_in=user_signed_in()
+                    )
             else:
                 message = "You are not authorized to edit this item"
                 url = url_for('descItem', itemtitle=item.title)
@@ -247,6 +291,7 @@ def editItem(itemtitle):
         message = "You are required to login"
         url = '/login'
         return render_template("alert.html", message=message, url=url)
+
 
 @app.route('/catalouge/<string:itemtitle>/delete', methods=['GET', 'POST'])
 def deleteItem(itemtitle):
@@ -263,8 +308,11 @@ def deleteItem(itemtitle):
                     return redirect(url_for('allItems', catgryname=category))
                 else:
                     # Render delete item form
-                    return render_template("deleteitem.html", item=item,
-                            user_signed_in=user_signed_in())
+                    return render_template(
+                        "deleteitem.html",
+                        item=item,
+                        user_signed_in=user_signed_in()
+                    )
             else:
                 # Redirect to view item page if user is not authorized
                 message = "You are not authorized to delete this item"
@@ -277,6 +325,7 @@ def deleteItem(itemtitle):
         message = "You are required to login"
         url = '/login'
         return render_template("alert.html", message=message, url=url)
+
 
 @app.route('/catalouge.json')
 def allCategoryJSON():
@@ -291,10 +340,12 @@ def allCategoryJSON():
 
     return jsonify(Category=list)
 
+
 # Handles error page
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 # Find category by it's name
 def getCategory(name):
@@ -302,6 +353,8 @@ def getCategory(name):
         return session.query(Category).filter(Category.name == name).one()
     except:
         return None
+
+
 # Find category by it's id
 def getCategoryById(id):
     print session.query(Category).filter_by(id=id).one()
@@ -309,12 +362,16 @@ def getCategoryById(id):
         return session.query(Category).filter_by(id=id).one()
     except:
         return None
+
+
 # Find item by it's title
 def getItemByTitle(title):
     try:
         return session.query(Item).filter_by(title=title).one()
     except:
         return None
+
+
 # Find category by it's id
 def getItemById(itemid):
     try:
@@ -322,9 +379,11 @@ def getItemById(itemid):
     except:
         return None
 
+
 def createUser(login_session):
-    newUser = User(name=login_session['username'], email=login_session['email'],
-                picture=login_session['picture'])
+    newUser = User(name=login_session['username'],
+                   email=login_session['email'],
+                   picture=login_session['picture'])
     session.add(newUser)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
@@ -344,11 +403,12 @@ def getUserID(user_email):
     except:
         return None
 
+
 def user_signed_in():
     return login_session.get('user_id')
 
 
 if __name__ == '__main__':
-  app.secret_key = 'super_secret_key'
-  app.debug = True
-  app.run(host = '0.0.0.0', port = 5000)
+    app.secret_key = 'super_secret_key'
+    app.debug = True
+    app.run(host='0.0.0.0', port=5000)
