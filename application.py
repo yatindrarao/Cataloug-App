@@ -21,12 +21,14 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# Store client id of application registered with Google
 CLIENT_ID = json.loads(
             open('client_secret.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Catalouge Application"
 
 @app.route('/login')
 def showLogin():
+    # Check if user is logged in
     if not user_signed_in():
         state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                 for x in xrange(32))
@@ -101,7 +103,7 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
-    # If user does not exist then create new user
+    # If user does not exist then create new user and store user_id in login_session
     user_id = getUserID(login_session['email'])
     if not user_id:
         createUser(login_session)
@@ -122,15 +124,18 @@ def gconnect():
 @app.route('/logout')
 def gdisconnet():
     access_token = login_session.get('credentials')
+    # Check if access token is present or not
     if access_token is None:
         flash("Current user is not connected")
         return redirect(url_for('allCategory'))
+    # Request google for logging out user
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'% access_token
 
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    print "Result is %s"%result
+
     if result['status'] == '200':
+        # After successful request removes all variables in login_session
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
@@ -140,18 +145,22 @@ def gdisconnet():
         flash("Successfully disconnected")
         return redirect(url_for('allCategory'))
     else:
+        # Some error
         flash("Failed to disconnet")
         return redirect(url_for('allCategory'))
 
 @app.route('/')
 def allCategory():
+    # Index page
     catgs = session.query(Category).all()
+    # fetch latest items with limit 6 results
     items = session.query(Item).order_by(desc(Item.created_at)).limit(6)
     return render_template("index.html", categories=catgs,
             items=items, user_signed_in=user_signed_in())
 
 @app.route('/catalouge/<string:catgryname>/items')
 def allItems(catgryname):
+    # All items of particular category
     category = getCategory(catgryname)
     if category:
         items = session.query(Item).filter_by(category_id=category.id).order_by(desc(Item.created_at))
@@ -163,6 +172,7 @@ def allItems(catgryname):
 
 @app.route('/catalouge/<string:itemtitle>')
 def descItem(itemtitle):
+    # Show details of item such as title and description
     item = getItemByTitle(itemtitle)
     if item:
         owner = item.user_id == login_session.get('user_id')
@@ -173,6 +183,7 @@ def descItem(itemtitle):
 
 @app.route('/catalouge/item/new', methods=['GET', 'POST'])
 def newItem():
+    # Redirect to login if user is not logged in
     if user_signed_in():
         categories = session.query(Category).all()
         if request.method == 'POST':
@@ -188,12 +199,14 @@ def newItem():
                     flash('New Item %s Successfully Created' % newItem.title)
                     return redirect(url_for('allItems', catgryname=category.name))
                 else:
+                    # Validates uniquness of Item by title
                     flash('title already exists!')
                     return render_template("newitem.html", categories=categories,
                         title=request.form['title'],
                         description=request.form['description'],
                         category_id=request.form['category_id'])
         else:
+            # Render form for new item
             return render_template("newitem.html", categories=categories,
                     user_signed_in=user_signed_in())
     else:
@@ -203,10 +216,12 @@ def newItem():
 
 @app.route('/catalouge/<string:itemtitle>/edit', methods=['GET', 'POST'])
 def editItem(itemtitle):
+    # Redirects to Login page if user is not logged in
     if user_signed_in():
         item = getItemByTitle(itemtitle)
         categories = session.query(Category).all()
         if item:
+            # Validates athorization of user to edit this item
             if item.user_id == login_session.get('user_id'):
                 if request.method == 'POST':
                     item.title = request.form['title']
@@ -218,6 +233,7 @@ def editItem(itemtitle):
                     flash('item edited Successfully!')
                     return redirect(url_for('descItem', itemtitle=item.title))
                 else:
+                    # Render Edit Item form
                     return render_template("edititem.html", item=item,
                             categories=categories, user_signed_in=user_signed_in())
             else:
@@ -225,6 +241,7 @@ def editItem(itemtitle):
                 url = url_for('descItem', itemtitle=item.title)
                 return render_template("alert.html", message=message, url=url)
         else:
+            # If no element is found by title given
             return "Not found"
     else:
         message = "You are required to login"
@@ -236,6 +253,7 @@ def deleteItem(itemtitle):
     if user_signed_in():
         item = getItemByTitle(itemtitle)
         if item:
+            # Validates authorization of User to delete this item
             if item.user_id == login_session.get('user_id'):
                 category = item.category.name
                 if request.method == 'POST':
@@ -244,13 +262,16 @@ def deleteItem(itemtitle):
                     flash('item deleted succssfully!')
                     return redirect(url_for('allItems', catgryname=category))
                 else:
+                    # Render delete item form
                     return render_template("deleteitem.html", item=item,
                             user_signed_in=user_signed_in())
             else:
+                # Redirect to view item page if user is not authorized
                 message = "You are not authorized to delete this item"
                 url = url_for('descItem', itemtitle=item.title)
                 return render_template("alert.html", message=message, url=url)
         else:
+            # If no element is found with given title
             return "No element found"
     else:
         message = "You are required to login"
@@ -259,6 +280,7 @@ def deleteItem(itemtitle):
 
 @app.route('/catalouge.json')
 def allCategoryJSON():
+    # Fetch all data in JSON format
     categories = session.query(Category).all()
     list = []
     for category in categories:
@@ -269,29 +291,31 @@ def allCategoryJSON():
 
     return jsonify(Category=list)
 
+# Handles error page
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+# Find category by it's name
 def getCategory(name):
     try:
         return session.query(Category).filter(Category.name == name).one()
     except:
         return None
-
+# Find category by it's id
 def getCategoryById(id):
     print session.query(Category).filter_by(id=id).one()
     try:
         return session.query(Category).filter_by(id=id).one()
     except:
         return None
-
+# Find item by it's title
 def getItemByTitle(title):
     try:
         return session.query(Item).filter_by(title=title).one()
     except:
         return None
-
+# Find category by it's id
 def getItemById(itemid):
     try:
         return session.query(Item).filter_by(id=itemid).one()
