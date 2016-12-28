@@ -15,9 +15,9 @@
       </div>
       <ul class="nav navbar-nav pull-right">
         {% if user_signed_in %}
-          <li><a class="btn btn-default" href="{{url_for('gdisconnet')}}">Logout</a></li>
+          <li><a class="btn btn-default login-button" href="{{url_for('gdisconnet')}}">Logout</a></li>
         {% else %}
-          <li><a class="btn btn-default" href="{{url_for('showLogin')}}">Login</a></li>
+          <li><a class="btn btn-default login-button" href="{{url_for('showLogin')}}">Login</a></li>
         {% endif %}
       </ul>
     </div>

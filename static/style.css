@@ -32,9 +32,19 @@ body
 {
   margin-bottom: 20px;
 }
-
+.login-button{
+  background-color: green;
+  border: none;
+  border-radius: 0;
+}
 /*Overriding Bootstrap Classes*/
 .list-group-item{
   border: 0;
   padding-left: 0;
+}
+.navbar-inverse .navbar-nav>li>a {
+    color: white;
+}
+.navbar-inverse .navbar-nav>li>a:focus, .navbar-inverse .navbar-nav>li>a:hover {
+    background-color: green;
 }
