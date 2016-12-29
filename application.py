@@ -341,6 +341,22 @@ def allCategoryJSON():
     return jsonify(Category=list)
 
 
+@app.route('/catalouge/<string:itemtitle>.json')
+def itemJSON(itemtitle):
+    # Fetch item data in JSON format
+    item = getItemByTitle(itemtitle)
+    if item:
+        cat = {'category': item.category.name}
+        output = item.serialize
+        output.update(cat)
+        return jsonify(Item=output)
+    else:
+        response = jsonify({'code': 404,
+                            'message': 'No interface defined for URL '})
+        response.status_code = 404
+        return response
+
+
 # Handles error page
 @app.errorhandler(404)
 def page_not_found(e):
